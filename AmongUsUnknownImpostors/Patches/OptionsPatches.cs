@@ -13,9 +13,11 @@ namespace AmongUsUnknownImpostors.Patches
     //Code from : https://github.com/Galster-dev/CrowdedSheriff/blob/master/src/OptionsPatches.cs <3
     internal class OptionsPatches
     {
-        public static bool unkImpostor = UnknownImpostorsPlugin.unkImpostor.Value;
+        public static bool unkImpostor = false;
+        public static float impoVision = 1.0f;
 
         const StringNames unkImpostorTitle = (StringNames) 2000;
+        const StringNames impoVisionTitle = (StringNames) 2001;
 
         [HarmonyPatch(typeof(TranslationController), nameof(TranslationController.GetString),
             new Type[] {typeof(StringNames), typeof(Il2CppReferenceArray<Il2CppSystem.Object>)})]
@@ -27,6 +29,9 @@ namespace AmongUsUnknownImpostors.Patches
                 {
                     case unkImpostorTitle:
                         __result = "Unk impostor";
+                        break;
+                    case impoVisionTitle:
+                        __result = "Impostor light off vision";
                         break;
                     default:
                         return true;
@@ -46,7 +51,9 @@ namespace AmongUsUnknownImpostors.Patches
                 {
                     case unkImpostorTitle:
                         unkImpostor = option.GetBool();
-                        UnknownImpostorsPlugin.unkImpostor.Value = unkImpostor;
+                        break;
+                    case impoVisionTitle:
+                        impoVision = option.GetFloat();
                         break;
                 }
 
@@ -65,14 +72,19 @@ namespace AmongUsUnknownImpostors.Patches
 
             static float GetLowestConfigY(GameOptionsMenu __instance)
             {
-                return __instance.GetComponentsInChildren<OptionBehaviour>().Min(option => option.transform.localPosition.y);
+                return __instance.GetComponentsInChildren<OptionBehaviour>()
+                    .Min(option => option.transform.localPosition.y);
             }
+
+            [HarmonyPriority(Priority.Normal - 2)]
             static void Postfix(ref GameOptionsMenu __instance)
             {
                 var lowestY = GetLowestConfigY(__instance);
 
-                var toggleOption = UnityEngine.Object.Instantiate(__instance.GetComponentsInChildren<ToggleOption>()[1], __instance.transform);
-                toggleOption.transform.localPosition = new Vector3(toggleOption.transform.localPosition.x, lowestY-0.5f, toggleOption.transform.localPosition.z);
+                var toggleOption = UnityEngine.Object.Instantiate(__instance.GetComponentsInChildren<ToggleOption>()[1],
+                    __instance.transform);
+                toggleOption.transform.localPosition = new Vector3(toggleOption.transform.localPosition.x,
+                    lowestY - 0.5f, toggleOption.transform.localPosition.z);
                 toggleOption.Title = unkImpostorTitle;
                 toggleOption.CheckMark.enabled = unkImpostor;
                 var str = "";
@@ -81,7 +93,24 @@ namespace AmongUsUnknownImpostors.Patches
                 toggleOption.OnValueChanged = new Action<OptionBehaviour>(OnValueChanged);
                 toggleOption.gameObject.AddComponent<OptionBehaviour>();
 
-                __instance.GetComponentInParent<Scroller>().YBounds.max += 0.5f;
+                var countOption = UnityEngine.Object.Instantiate(
+                    GameObject.FindObjectsOfType<NumberOption>().ToList()
+                        .First(x => x.TitleText.Text == "Impostor Vision"),
+                    __instance.transform);
+                countOption.transform.localPosition = new Vector3(countOption.transform.localPosition.x,
+                    lowestY - 1f, countOption.transform.localPosition.z);
+                countOption.Title = impoVisionTitle;
+                countOption.Value = impoVision;
+                var str3 = "";
+                TranslationController_GetString.Prefix(countOption.Title, ref str3);
+                countOption.TitleText.Text = str3;
+                countOption.OnValueChanged = new Action<OptionBehaviour>(OnValueChanged);
+                countOption.gameObject.AddComponent<OptionBehaviour>();
+                countOption.Increment = 0.25f;
+                countOption.ValidRange.min = 0.25f;
+                countOption.ValidRange.max = 5.0f;
+
+                __instance.GetComponentInParent<Scroller>().YBounds.max += 1.0f;
             }
         }
 
@@ -91,6 +120,27 @@ namespace AmongUsUnknownImpostors.Patches
             static void Prefix(ref GameSettingMenu __instance)
             {
                 __instance.HideForOnline = new Il2CppReferenceArray<Transform>(0);
+            }
+        }
+
+        [HarmonyPatch(typeof(NumberOption), nameof(NumberOption.OnEnable))]
+        static class NumberOption_OnEnable
+        {
+            static bool Prefix(ref NumberOption __instance)
+            {
+                if (__instance.Title == impoVisionTitle)
+                {
+                    string smh = "";
+                    TranslationController_GetString.Prefix(__instance.Title, ref smh);
+                    __instance.TitleText.Text = smh;
+                    __instance.OnValueChanged = new Action<OptionBehaviour>(GameOptionsMenu_Start.OnValueChanged);
+                    __instance.Value = impoVision;
+                    __instance.enabled = true;
+
+                    return false;
+                }
+
+                return true;
             }
         }
 
@@ -118,10 +168,19 @@ namespace AmongUsUnknownImpostors.Patches
         [HarmonyPatch(typeof(GameOptionsData), nameof(GameOptionsData.Method_24))]
         static class GameOptionsData_ToHudString
         {
+            [HarmonyPriority(Priority.Normal - 2)]
             static void Postfix(ref string __result)
             {
                 var builder = new System.Text.StringBuilder(__result);
+                builder.AppendLine();
                 builder.AppendLine($"Unk impostor: {unkImpostor}");
+                if (unkImpostor)
+                {
+                    builder.Append("Impostor light off vision: ");
+                    builder.Append(impoVision);
+                    builder.Append("x");
+                    builder.AppendLine();
+                }
                 __result = builder.ToString();
             }
         }
@@ -139,6 +198,15 @@ namespace AmongUsUnknownImpostors.Patches
                 {
                     unkImpostor = false;
                 }
+
+                try
+                {
+                    impoVision = System.BitConverter.ToSingle(ALMCIJKELCP.ReadBytes(4).ToArray(), 0);
+                }
+                catch
+                {
+                    impoVision = 0.5f;
+                }
             }
         }
 
@@ -155,6 +223,15 @@ namespace AmongUsUnknownImpostors.Patches
                 {
                     unkImpostor = false;
                 }
+
+                try
+                {
+                    impoVision = System.BitConverter.ToSingle(ALMCIJKELCP.ReadBytes(4).ToArray(), 0);
+                }
+                catch
+                {
+                    impoVision = 1.0f;
+                }
             }
         }
 
@@ -165,6 +242,7 @@ namespace AmongUsUnknownImpostors.Patches
             static void Postfix(BinaryWriter AGLJMGAODDG)
             {
                 AGLJMGAODDG.Write(unkImpostor);
+                AGLJMGAODDG.Write(impoVision);
             }
         }
     }
