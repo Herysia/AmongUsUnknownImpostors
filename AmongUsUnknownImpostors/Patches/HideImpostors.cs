@@ -10,30 +10,6 @@ namespace AmongUsUnknownImpostors.Patches
 {
     internal class HideImpostors
     {
-        //Patch that fakes player not being an impostor when he send a text message
-        //Doest work -> trigger end game
-        /*
-        [HarmonyPatch(typeof(ChatController), nameof(ChatController.AddChat))]
-        public static class ChatController_AddChat
-        {
-            public static void Prefix(ChatController __instance, ref PlayerControl KMCAKLLFNIM, bool __state)
-            {
-                var pc = KMCAKLLFNIM;
-                if (!OptionsPatches.unkImpostor || pc == PlayerControl.LocalPlayer)
-                    return;
-                __state = pc.Data.IsImpostor;
-                pc.Data.IsImpostor = false;
-            }
-
-            public static void Postfix(ChatController __instance, ref PlayerControl KMCAKLLFNIM, bool __state)
-            {
-                var pc = KMCAKLLFNIM;
-                if (!OptionsPatches.unkImpostor || pc == PlayerControl.LocalPlayer)
-                    return;
-                pc.Data.IsImpostor = __state;
-            }
-        }
-        */
         [HarmonyPatch(typeof(ChatController), nameof(ChatController.AddChat))]
         public static class ChatController_AddChat
         {
@@ -69,7 +45,7 @@ namespace AmongUsUnknownImpostors.Patches
             public static void Prefix(IntroCutscene __instance,
                 ref Il2CppSystem.Collections.Generic.List<PlayerControl> KADFCNPGKLO)
             {
-                if (!OptionsPatches.unkImpostor) return;
+                if (!CustomGameOptionsData.customGameOptions.unkImpostor.value) return;
                 var yourTeam = KADFCNPGKLO;
                 yourTeam.Clear();
                 yourTeam.Add(PlayerControl.LocalPlayer);
@@ -83,7 +59,7 @@ namespace AmongUsUnknownImpostors.Patches
             public static void Postfix(MeetingHud __instance, GameData.PlayerInfo PPIKPNJEAKJ,
                 ref PlayerVoteArea __result)
             {
-                if (!OptionsPatches.unkImpostor) return;
+                if (!CustomGameOptionsData.customGameOptions.unkImpostor.value) return;
                 GameData.PlayerInfo playerInfo = PPIKPNJEAKJ;
                 if (playerInfo.IsImpostor && playerInfo.Object != PlayerControl.LocalPlayer)
                     __result.NameText.Color = UnityEngine.Color.white;
@@ -102,7 +78,7 @@ namespace AmongUsUnknownImpostors.Patches
 
             public static bool Prefix(PlayerControl __instance, ref PlayerControl __result)
             {
-                if (!OptionsPatches.unkImpostor) return true;
+                if (!CustomGameOptionsData.customGameOptions.unkImpostor.value) return true;
                 PlayerControl result = null;
                 float num = GameOptionsData.KillDistances[
                     Mathf.Clamp(PlayerControl.GameOptions.KillDistance, 0, 2)];
@@ -144,7 +120,7 @@ namespace AmongUsUnknownImpostors.Patches
         {
             public static void Postfix(PlayerControl __instance, Il2CppStructArray<byte> JPGEIBIBJPJ)
             {
-                if (!OptionsPatches.unkImpostor) return;
+                if (!CustomGameOptionsData.customGameOptions.unkImpostor.value) return;
                 var infected = JPGEIBIBJPJ;
                 for (int j = 0; j < infected.Length; j++)
                 {

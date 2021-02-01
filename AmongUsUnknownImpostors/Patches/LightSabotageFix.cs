@@ -13,7 +13,7 @@ namespace AmongUsUnknownImpostors.Patches
         {
             public static bool Prefix(ShipStatus __instance, GameData.PlayerInfo IIEKJBMPELC, ref float __result)
             {
-                if (!OptionsPatches.unkImpostor) return true;
+                if (!CustomGameOptionsData.customGameOptions.unkImpostor.value) return true;
                 var player = IIEKJBMPELC;
                 if (player == null || player.IsDead)
                 {
@@ -26,7 +26,7 @@ namespace AmongUsUnknownImpostors.Patches
                 if (player.IsImpostor)
                 {
                     __result = Mathf.Lerp(__instance.MinLightRadius, __instance.MaxLightRadius, num) *
-                               Mathf.Lerp(OptionsPatches.impoVision, PlayerControl.GameOptions.ImpostorLightMod, num);
+                               Mathf.Lerp(CustomGameOptionsData.customGameOptions.impoVision.value, PlayerControl.GameOptions.ImpostorLightMod, num);
                     return false;
                 }
 
