@@ -6,6 +6,7 @@ Among us mod that fixes some game breaking bugs when tryharding among us. As wel
 
 -   Impostors don't know each other
 -   Impostors can kill each other
+-   Impostors are impacted by lights sabotage (it can be individually customized in the lobby settings)
 -   The module can be disabled from a lobby command, and will be automatically disabled if the host doesn't have the mod installed
 -   Allow you to change map and impostor count from the game lobby (Thx [@Galster](https://github.com/Galster-dev))
 
@@ -49,6 +50,10 @@ If you want to completely uninstall Reactor/BepInEx, remove the following files 
 # Contributing
 
 You have encountered a bug or unexpected behaviour ? You want to suggest or add a new feature ? Create an [Issue](https://github.com/Herysia/AmongUsUnknownImpostors/issues) or [PR](https://github.com/Herysia/AmongUsUnknownImpostors/pulls) !
+
+### Dependency
+
+This mod depends on [another module](https://github.com/Herysia/CustomLobbyOptions) which simplify lobby options (add to menu, sync settings and save settings individually with customisable display)
 
 ### Creating PR
 
