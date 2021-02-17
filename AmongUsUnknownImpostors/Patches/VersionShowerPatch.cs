@@ -33,7 +33,7 @@ namespace AmongUsUnknownImpostors.Patches
                 herysiaVersionShower.Text,
                 "\n",
                 "AmongUsUnknownImpostors",
-                " v1.2.0",
+                " v1.2.1",
                 " by Herysia#4293"
             });
         }
