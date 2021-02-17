@@ -10,6 +10,7 @@ namespace AmongUsUnknownImpostors
     [BepInPlugin(Id)]
     [BepInProcess("Among Us.exe")]
     [BepInDependency(ReactorPlugin.Id)]
+    [BepInDependency("com.herysia.LobbyOptionsAPI")]
     public class UnknownImpostorsPlugin : BasePlugin
     {
         public const string Id = "com.herysia.amongusunkimpostor";
